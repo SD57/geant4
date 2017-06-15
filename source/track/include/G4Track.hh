@@ -53,6 +53,7 @@
 
 #include "globals.hh"                 // Include from 'global'
 #include "trkdefs.hh"                 // Include DLL defs...
+//#include "CLHEP/Random/RandomEngine.h" //
 #include "G4ThreeVector.hh"           // Include from 'geometry'
 #include "G4LogicalVolume.hh"         // Include from 'geometry'
 #include "G4VPhysicalVolume.hh"       // Include from 'geometry'
@@ -266,6 +267,14 @@ public: // With description
   static G4double GetMinTOfVelocityTable();
   static G4int    GetNbinOfVelocityTable();
 
+//  void StoreRNGstate();
+//  void RestoreRNGstate();
+  // give more control to the user
+  void SetRNGstate(std::vector<unsigned long> const& aRNGstate);
+  void SetRNGstate(std::vector<unsigned long>&& aRNGstate);
+  // maybe return a copy for safety?
+  std::vector<unsigned long> const& GetRNGstate() const;
+
 //---------
    private:
 //---------
@@ -326,6 +335,8 @@ public: // With description
    G4bool          useGivenVelocity;
       // do not calclulate velocity and just use current fVelocity
       // if this flag is set
+
+   std::vector<unsigned long> fRNGstate;
 
    mutable std::map<G4int,G4VAuxiliaryTrackInformation*>* fpAuxiliaryTrackInformationMap;
 

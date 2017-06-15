@@ -29,7 +29,10 @@
 # Includes for this modules
 #
 include_directories(include)
-
+include_directories(Random123/include)
+include_directories(Random123/include/features)
+include_directories(Random123/include/conventional)
+include_directories(Random123/include/examples)
 
 #----------------------------------------------------------------------------
 # Compile definitions needed
@@ -100,6 +103,8 @@ set(G4clhep_HEADERS
     include/CLHEP/Random/RanluxEngine.h
     include/CLHEP/Random/RanshiEngine.h
     include/CLHEP/Random/SeedTable.h
+    include/CLHEP/Random/random123.h
+    include/CLHEP/Random/G4Cbprng.h
     include/CLHEP/Random/Stat.h
     include/CLHEP/Random/StaticRandomStates.h
     include/CLHEP/Random/gaussQTables.cdat
@@ -142,6 +147,30 @@ set(G4clhep_HEADERS
     include/CLHEP/Vector/ThreeVector.icc
     include/CLHEP/Vector/TwoVector.h
     include/CLHEP/Vector/TwoVector.icc
+    Random123/examples/uniform.hpp
+    Random123/LICENSE
+    Random123/include/threefry.h
+    Random123/include/aes.h
+    Random123/include/philox.h
+    Random123/include/features/xlcfeatures.h
+    Random123/include/features/nvccfeatures.h
+    Random123/include/features/openclfeatures.h
+    Random123/include/features/clangfeatures.h
+    Random123/include/features/sse.h
+    Random123/include/features/compilerfeatures.h
+    Random123/include/features/pgccfeatures.h
+    Random123/include/features/iccfeatures.h
+    Random123/include/features/open64features.h
+    Random123/include/features/gccfeatures.h
+    Random123/include/features/msvcfeatures.h
+    Random123/include/features/sunprofeatures.h
+    Random123/include/ars.h
+    Random123/include/MicroURNG.hpp
+    Random123/include/gsl_microrng.h
+    Random123/include/array.h
+    Random123/include/ReinterpretCtr.hpp
+    Random123/include/conventional/Engine.hpp
+    Random123/include/conventional/gsl_cbrng.h
 )
 
 # - Sources

@@ -318,3 +318,13 @@ extern G4TRACK_DLL G4ThreadLocal G4Allocator<G4Track> *aTrackAllocator;
 
    inline void G4Track::SetStep(const G4Step* aValue)
    { fpStep = aValue; }
+
+   inline void G4Track::SetRNGstate(std::vector<unsigned long> const& aRNGstate)
+   { fRNGstate = aRNGstate;}
+
+   inline void G4Track::SetRNGstate(std::vector<unsigned long>&& aRNGstate)
+   { fRNGstate = aRNGstate;}
+
+   inline std::vector<unsigned long> const& G4Track::GetRNGstate() const
+   { return fRNGstate; }
+
