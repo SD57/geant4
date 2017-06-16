@@ -70,6 +70,7 @@ void G4TrackingManager::ProcessOneTrack(G4Track* apValueG4Track)
 
   // Receiving a G4Track from the EventManager, this funciton has the
   // responsibility to trace the track till it stops.
+
   fpTrack = apValueG4Track;
   EventIsAborted = false;
 
@@ -87,6 +88,7 @@ void G4TrackingManager::ProcessOneTrack(G4Track* apValueG4Track)
   
   // Give SteppingManger the pointer to the track which will be tracked 
   fpSteppingManager->SetInitialStep(fpTrack);
+  // TODO this is the place to set the rng state from the newly received track
 
   // Pre tracking user intervention process.
   fpTrajectory = 0;
@@ -134,6 +136,8 @@ void G4TrackingManager::ProcessOneTrack(G4Track* apValueG4Track)
   }
   // Inform end of tracking to physics processes 
   fpTrack->GetDefinition()->GetProcessManager()->EndTracking();
+
+    // TODO this is the place to assign rng state to the daughter tracks
 
   // Post tracking user intervention process.
   if( fpUserTrackingAction != 0 ) {
