@@ -267,13 +267,8 @@ public: // With description
   static G4double GetMinTOfVelocityTable();
   static G4int    GetNbinOfVelocityTable();
 
-//  void StoreRNGstate();
-//  void RestoreRNGstate();
-  // give more control to the user
-  void SetRNGstate(std::vector<unsigned long> const& aRNGstate);
-  void SetRNGstate(std::vector<unsigned long>&& aRNGstate);
-  // maybe return a copy for safety?
-  std::vector<unsigned long> const& GetRNGstate() const;
+  void SetHash(uint64_t aHash);
+  uint64_t GetHash() const;
 
 //---------
    private:
@@ -336,7 +331,7 @@ public: // With description
       // do not calclulate velocity and just use current fVelocity
       // if this flag is set
 
-   std::vector<unsigned long> fRNGstate;
+   uint64_t fHash;
 
    mutable std::map<G4int,G4VAuxiliaryTrackInformation*>* fpAuxiliaryTrackInformationMap;
 

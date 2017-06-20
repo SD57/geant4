@@ -45,8 +45,6 @@
 #include "Randomize.hh"
 
 #include "CLHEP/Random/RandomEngine.h" // FIXME for the clang-based IDE parser, redundant
-#include "CLHEP/Random/G4Cbprng.h"
-#include "CLHEP/Random/random123.h"
 
 #if defined(G4MULTITHREADED)
 #define HEPRNDM G4MTHepRandom
@@ -57,11 +55,7 @@
 namespace
 {
 template <class T> void hash_combine(std::size_t& seed, T const& v);
- // TODO check that it is a container of hashable types
-template <class Container> std::size_t hashContainer(Container const& aContainer,
-                                                     std::size_t aSeed = 0);
 }
-
 
 class G4VSteppingVerbose;
 
@@ -111,16 +105,18 @@ void G4TrackingManager::ProcessOneTrack(G4Track* apValueG4Track)
   fpSteppingManager->SetInitialStep(fpTrack);
 
   // TODO this is the place to set the rng state from the newly received track
-  auto const& trackRNGstate = fpTrack->GetRNGstate();
-  if(trackRNGstate.size()) // safety to work before fully implemented
+  CLHEP::HepRandomEngine& currentEngine = *HEPRNDM::getTheEngine();
+  auto const trackHash = fpTrack->GetHash();
+  if(trackHash) // safety to work before fully implemented
   {
-    CLHEP::HepRandomEngine* currentEngine = HEPRNDM::getTheEngine();
-    currentEngine->get(trackRNGstate);
+    currentEngine.setSeed(trackHash, 0); // FIXME second argument?
   }
-  else
+  else // for the first track in the event
   {
-    CLHEP::HepRandomEngine* currentEngine = HEPRNDM::getTheEngine();
-    fpTrack->SetRNGstate(currentEngine->put());
+    uint32_t const low = static_cast<unsigned int>(currentEngine);//fixed width for bit operations
+    uint32_t const high = static_cast<unsigned int>(currentEngine);
+    uint64_t const composition = static_cast<uint64_t>(high) << 32 | low;
+    fpTrack->SetHash(composition);
   }
 
   // Pre tracking user intervention process.
@@ -171,29 +167,26 @@ void G4TrackingManager::ProcessOneTrack(G4Track* apValueG4Track)
   fpTrack->GetDefinition()->GetProcessManager()->EndTracking();
 
   // TODO this is the place to assign rng state to the daughter tracks
-  CLHEP::HepRandomEngine& currentEngine = *HEPRNDM::getTheEngine();
+  currentEngine.setSeed(trackHash, 0); // FIXME second argument?
   auto* theSecondaries = GimmeSecondaries();
   auto const numOfSecondaries = theSecondaries->size();
   for(auto ind = 0u; ind < numOfSecondaries; ++ind)
   {
     auto* secondary = theSecondaries->at(ind);
-    uint32_t const low = static_cast<unsigned int>(currentEngine);//fixed width for bit operations
-    uint32_t const high = static_cast<unsigned int>(currentEngine);
-    uint64_t const composition = static_cast<uint64_t>(high) << 32 | low;
-    auto seed = static_cast<signed>(hashContainer(trackRNGstate, composition));
-    currentEngine.setSeed(seed, 0); // FIXME: is the second parameter used by any engine?
-    auto newState = currentEngine.put();
-    secondary->SetRNGstate(newState);
+    auto aHash = trackHash;
+    hash_combine(aHash, ind);
+    auto seed = static_cast<signed>(aHash); // TODO a stronger hash
+    secondary->SetHash(seed);
   }
 
-  // TODO chea\ck if it is a counter based
+  // TODO check if it is a counter based
   // then iterate over all secondaries incrementing the major counter
   //    G4bool isCBPRNG = dynamic_cast<CLHEP::G4Cbprng<r123::Philox2x32>*>(currentEngine);
   //    if(isCBPRNG)
   //    {
   //      auto* theCBPRNGEngine = static_cast<CLHEP::G4Cbprng<r123::Philox2x32>*>(currentEngine);
 
-  //      currentEngine->get(trackRNGstate);
+  //      currentEngine->get(trackHash);
   //    }
   //    else
   //    {
@@ -260,16 +253,6 @@ namespace
 template <class T> inline void hash_combine(std::size_t& seed, T const& v)
 {
     seed ^= std::hash<T>()(v) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
-}
-
-template <class Container> inline std::size_t hashContainer(Container const& aContainer,
-                                                            std::size_t aSeed)
-{
-  for(auto const& it : aContainer)
-  {
-    hash_combine(aSeed, it);
-  }
-  return aSeed;
 }
 }
 

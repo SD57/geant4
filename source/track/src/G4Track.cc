@@ -76,6 +76,7 @@ G4Track::G4Track(G4DynamicParticle* apValueDynamicParticle,
     prev_velocity(0.0), prev_momentum(0.0),
     is_OpticalPhoton(false),
     useGivenVelocity(false),
+    fHash(0),
     fpAuxiliaryTrackInformationMap(0)
 {
   static G4ThreadLocal G4bool isFirstTime = true;
@@ -115,6 +116,7 @@ G4Track::G4Track()
     prev_velocity(0.0), prev_momentum(0.0),
     is_OpticalPhoton(false),
     useGivenVelocity(false),
+    fHash(0),
     fpAuxiliaryTrackInformationMap(0)
 {
 }
@@ -140,6 +142,7 @@ G4Track::G4Track(const G4Track& right)
     prev_velocity(0.0), prev_momentum(0.0),
     is_OpticalPhoton(false),
     useGivenVelocity(false),
+    fHash(0),
     fpAuxiliaryTrackInformationMap(0)
 {
   *this = right;
@@ -205,7 +208,7 @@ G4Track & G4Track::operator=(const G4Track &right)
 
    is_OpticalPhoton = right.is_OpticalPhoton;
    useGivenVelocity = right.useGivenVelocity; 
-   fRNGstate = right.fRNGstate;
+   fHash = right.fHash;
    fpAuxiliaryTrackInformationMap = 0;
   }
   return *this;
