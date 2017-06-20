@@ -2,14 +2,14 @@
 //
 //    Distributed under the GNU General Public License version 3.
 
-#include "G4Cbprng.hh"
-#include "uniform.hpp"
+#include "CLHEP/Random/G4Cbprng.h"
 #include "CLHEP/Random/engineIDulong.h"
-#include "ExtendedEngineFactory.hh"
 #include "CLHEP/Utility/atomic_int.h"
 #include <type_traits>
 
-#include "random123.hpp"
+#include "CLHEP/../../Random123/examples/uniform.hpp"
+#include "CLHEP/../../Random123/include/philox.h"
+#include "CLHEP/../../Random123/include/threefry.h"
 
 // uncomment for debugging output
 //#define G4CBPRNGDEBUG
@@ -180,12 +180,6 @@ void G4Cbprng<RNG_t>::showStatus() const
             << "fCtr = " << fCtr
             << ", fKey = " << fKey
             << std::endl;
-}
-
-template<typename RNG_t>
-HepRandomEngine* G4Cbprng<RNG_t>::newEngine(const std::vector<unsigned long> & v)
-{
-  return ExtendedEngineFactory::newEngine(v);
 }
 
 template<typename RNG_t>

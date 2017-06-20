@@ -37,6 +37,9 @@ include_directories(${CMAKE_SOURCE_DIR}/source/processes/cuts/include)
 include_directories(${CMAKE_SOURCE_DIR}/source/processes/electromagnetic/utils/include)
 include_directories(${CMAKE_SOURCE_DIR}/source/processes/management/include)
 include_directories(${CMAKE_SOURCE_DIR}/source/track/include)
+include_directories(${CMAKE_SOURCE_DIR}/source/externals/clhep/include/CLHEP/Random/)
+include_directories(${CMAKE_SOURCE_DIR}/source/externals/clhep/Random123/include/)
+include_directories(${CMAKE_SOURCE_DIR}/source/externals/clhep/Random123/examples/)
 
 #
 # Define the Geant4 Module.

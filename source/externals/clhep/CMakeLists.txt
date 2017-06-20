@@ -58,6 +58,7 @@ set(G4clhep_HEADERS
     include/CLHEP/Random/DualRand.h
     include/CLHEP/Random/EngineFactory.h
     include/CLHEP/Random/engineIDulong.h
+    include/CLHEP/Random/G4Cbprng.h
     include/CLHEP/Random/JamesRandom.h
     include/CLHEP/Random/mixmax.h
     include/CLHEP/Random/mixmax_skip_N8.icc
@@ -189,6 +190,7 @@ set(G4clhep_SOURCES
     src/EulerAngles.cc
     src/Evaluator.cc
     src/flatToGaussian.cc
+    src/G4Cbprng.cc
     src/gammln.cc
     src/JamesRandom.cc
     src/LorentzRotation.cc

@@ -205,7 +205,7 @@ G4Track & G4Track::operator=(const G4Track &right)
 
    is_OpticalPhoton = right.is_OpticalPhoton;
    useGivenVelocity = right.useGivenVelocity; 
-
+   fRNGstate = right.fRNGstate;
    fpAuxiliaryTrackInformationMap = 0;
   }
   return *this;

@@ -59,10 +59,6 @@ public:
   // Engine name.
   static std::string beginTag();
 
-  static HepRandomEngine* newEngine(const std::vector<unsigned long> & v);
-  // Instantiates on the heap a new engine of type specified by content of v
-  // aware of not standard types but not virtual and needs to ce called explicitly
-
 private:
   RNG fRNG;
   ctr_type fCtr;
