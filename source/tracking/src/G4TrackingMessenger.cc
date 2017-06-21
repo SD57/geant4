@@ -46,6 +46,7 @@
 #include "G4UIdirectory.hh"
 #include "G4UIcmdWithoutParameter.hh"
 #include "G4UIcmdWithAnInteger.hh"
+#include "G4UIcmdWithAString.hh"
 #include "G4UImanager.hh"
 #include "globals.hh"
 #include "G4TrackingManager.hh"
@@ -55,6 +56,23 @@
 #include "G4TransportationManager.hh"
 #include "G4PropagatorInField.hh"
 #include "G4IdentityTrajectoryFilter.hh"
+
+
+#include <map>
+
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+
+namespace
+{
+// TODO make compile-time
+  std::map<G4String, G4TrackingManager::RngType> const theRNGTypesMap
+  {
+    {"default", G4TrackingManager::RngType::fDefault},
+    {"generic", G4TrackingManager::RngType::fGeneric},
+    {"special", G4TrackingManager::RngType::fSpecial},
+  };
+}
+
 
 ///////////////////////////////////////////////////////////////////
 G4TrackingMessenger::G4TrackingMessenger(G4TrackingManager * trMan)
@@ -105,6 +123,27 @@ G4TrackingMessenger::G4TrackingMessenger(G4TrackingManager * trMan)
 #else 
   VerboseCmd->SetGuidance("You need to recompile the tracking category defining G4VERBOSE ");  
 #endif
+
+  RNGCmd = new G4UIcmdWithAString("/tracking/rng", this);
+  RNGCmd->SetGuidance("Control the random generator track-dependent seeding");
+  RNGCmd->SetGuidance("default : Disabled, uses the thread state");
+  RNGCmd->SetGuidance("generic : Enabled, uses the HepRandomEngine common interface");
+  RNGCmd->SetGuidance("special : Enabled, uses the concrete engine implementation if avaliable (unimplemented)");
+  RNGCmd->SetParameterName("rng_type", false);
+  RNGCmd->SetDefaultValue("default");
+  G4String const candidateString = []()
+  {
+    G4String str;
+    for(auto const& p : ::theRNGTypesMap)
+    {
+      str += p.first;
+      str += " ";
+    }
+    return str;
+  }();
+  RNGCmd->SetCandidates(candidateString);
+//  RNGCmd->SetToBeBroadcasted(true); TODO check if it is needed
+  RNGCmd->AvailableForStates(G4State_Idle);
 }
 
 ////////////////////////////////////////////
@@ -116,6 +155,7 @@ G4TrackingMessenger::~G4TrackingMessenger()
   delete ResumeCmd;
   delete StoreTrajectoryCmd;
   delete VerboseCmd;
+  delete RNGCmd;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -131,8 +171,13 @@ void G4TrackingMessenger::SetNewValue(G4UIcommand * command,G4String newValues)
     G4UImanager::GetUIpointer()->ApplyCommand("/control/exit");
   }
 
-  if( command  == ResumeCmd ){
+  if( command  == ResumeCmd ){// ????
         G4UImanager::GetUIpointer()->ApplyCommand("/control/exit");
+  }
+
+  if( command == RNGCmd ){
+//    return trackingManager->GetStoreRNGstate();
+    trackingManager->SetRngType(theRNGTypesMap.at(newValues));
   }
 
   static G4ThreadLocal G4IdentityTrajectoryFilter* auxiliaryPointsFilter = 0;
@@ -164,6 +209,10 @@ G4String G4TrackingMessenger::GetCurrentValue(G4UIcommand * command)
   else if( command == StoreTrajectoryCmd ){
     return StoreTrajectoryCmd->ConvertToString(trackingManager->GetStoreTrajectory());
   }
+  else if( command == RNGCmd ){
+//    return trackingManager->GetStoreRNGstate();
+  }
+
   return G4String('\0');
 }
 

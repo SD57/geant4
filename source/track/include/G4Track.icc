@@ -319,9 +319,9 @@ extern G4TRACK_DLL G4ThreadLocal G4Allocator<G4Track> *aTrackAllocator;
    inline void G4Track::SetStep(const G4Step* aValue)
    { fpStep = aValue; }
 
-   inline void G4Track::SetHash(uint64_t aHash)
+   inline void G4Track::SetHash(int64_t aHash)
    { fHash = aHash;}
 
-   inline uint64_t G4Track::GetHash() const
+   inline int64_t G4Track::GetHash() const
    { return fHash; }
 

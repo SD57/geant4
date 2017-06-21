@@ -63,7 +63,8 @@ class G4VSteppingVerbose;
 G4TrackingManager::G4TrackingManager()
 //////////////////////////////////////
   : fpUserTrackingAction(0), fpTrajectory(0),
-    StoreTrajectory(0), verboseLevel(0), EventIsAborted(false)
+    StoreTrajectory(0), verboseLevel(0), EventIsAborted(false),
+    fRngType(fDefault)
 {
   fpSteppingManager = new G4SteppingManager();
   messenger = new G4TrackingMessenger(this);
@@ -104,20 +105,26 @@ void G4TrackingManager::ProcessOneTrack(G4Track* apValueG4Track)
   // Give SteppingManger the pointer to the track which will be tracked 
   fpSteppingManager->SetInitialStep(fpTrack);
 
+
   // TODO this is the place to set the rng state from the newly received track
-  CLHEP::HepRandomEngine& currentEngine = *HEPRNDM::getTheEngine();
-  auto const trackHash = fpTrack->GetHash();
-  if(trackHash) // safety to work before fully implemented
+  auto const trackHash = (fRngType == fDefault) ? 0 : [this]()
   {
-    currentEngine.setSeed(trackHash, 0); // FIXME second argument?
-  }
-  else // for the first track in the event
-  {
-    uint32_t const low = static_cast<unsigned int>(currentEngine);//fixed width for bit operations
-    uint32_t const high = static_cast<unsigned int>(currentEngine);
-    uint64_t const composition = static_cast<uint64_t>(high) << 32 | low;
-    fpTrack->SetHash(composition);
-  }
+    auto const hash = fpTrack->GetHash();
+    auto& currentHepRandomEngine = *HEPRNDM::getTheEngine();
+    if(hash) // safety to work before fully implemented
+    {
+      currentHepRandomEngine.setSeed(static_cast<signed>(hash), 0); // FIXME second argument?
+      return hash;
+    }
+    else // for the first track in the event
+    {
+      uint32_t const low = static_cast<unsigned int>(currentHepRandomEngine);//fixed width for bit operations
+      uint32_t const high = static_cast<unsigned int>(currentHepRandomEngine);
+      int64_t const composition = static_cast<int64_t>(high) << 32 | low;
+      fpTrack->SetHash(composition);
+      return composition;
+    }
+  }();
 
   // Pre tracking user intervention process.
   fpTrajectory = 0;
@@ -166,33 +173,22 @@ void G4TrackingManager::ProcessOneTrack(G4Track* apValueG4Track)
   // Inform end of tracking to physics processes 
   fpTrack->GetDefinition()->GetProcessManager()->EndTracking();
 
-  // TODO this is the place to assign rng state to the daughter tracks
-  currentEngine.setSeed(trackHash, 0); // FIXME second argument?
-  auto* theSecondaries = GimmeSecondaries();
-  auto const numOfSecondaries = theSecondaries->size();
-  for(auto ind = 0u; ind < numOfSecondaries; ++ind)
+  // this is the place to assign rng state to the daughter tracks
+  if(fRngType != fDefault)
   {
-    auto* secondary = theSecondaries->at(ind);
-    auto aHash = trackHash;
-    hash_combine(aHash, ind);
-    auto seed = static_cast<signed>(aHash); // TODO a stronger hash
-    secondary->SetHash(seed);
+    auto& currentHepRandomEngine = *HEPRNDM::getTheEngine();
+    currentHepRandomEngine.setSeed(trackHash, 0); // FIXME second argument?
+    auto* theSecondaries = GimmeSecondaries();
+    auto const numOfSecondaries = theSecondaries->size();
+    for(auto ind = 0lu; ind < numOfSecondaries; ++ind)
+    {
+      auto* secondary = theSecondaries->at(ind);
+      auto aHash = trackHash;
+      hash_combine(ind, aHash);
+      auto seed = static_cast<signed>(aHash); // TODO a stronger hash
+      secondary->SetHash(seed);
+    }
   }
-
-  // TODO check if it is a counter based
-  // then iterate over all secondaries incrementing the major counter
-  //    G4bool isCBPRNG = dynamic_cast<CLHEP::G4Cbprng<r123::Philox2x32>*>(currentEngine);
-  //    if(isCBPRNG)
-  //    {
-  //      auto* theCBPRNGEngine = static_cast<CLHEP::G4Cbprng<r123::Philox2x32>*>(currentEngine);
-
-  //      currentEngine->get(trackHash);
-  //    }
-  //    else
-  //    {
-
-  //    }
-
 
   // Post tracking user intervention process.
   if( fpUserTrackingAction != 0 ) {

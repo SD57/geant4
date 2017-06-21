@@ -267,8 +267,8 @@ public: // With description
   static G4double GetMinTOfVelocityTable();
   static G4int    GetNbinOfVelocityTable();
 
-  void SetHash(uint64_t aHash);
-  uint64_t GetHash() const;
+  void SetHash(int64_t aHash);
+  int64_t GetHash() const;
 
 //---------
    private:
@@ -331,7 +331,7 @@ public: // With description
       // do not calclulate velocity and just use current fVelocity
       // if this flag is set
 
-   uint64_t fHash;
+   int64_t fHash;
 
    mutable std::map<G4int,G4VAuxiliaryTrackInformation*>* fpAuxiliaryTrackInformationMap;
 

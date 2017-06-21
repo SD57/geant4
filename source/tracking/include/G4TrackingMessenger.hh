@@ -49,6 +49,7 @@ class G4UIdirectory;
 class G4UIcmdWithoutParameter;
 class G4UIcmdWithAnInteger;
 class G4UIcmdWithABool;
+class G4UIcmdWithAString;
 class G4TrackingManager;
 class G4SteppingManager;
 #include "G4UImessenger.hh"
@@ -79,6 +80,7 @@ public: // without description
     G4UIcmdWithoutParameter *   ResumeCmd;
     G4UIcmdWithAnInteger *      StoreTrajectoryCmd;
     G4UIcmdWithAnInteger *      VerboseCmd;
+    G4UIcmdWithAString *        RNGCmd;
 
 };
 

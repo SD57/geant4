@@ -128,6 +128,14 @@ public: // without description
       // implementation to set his/her own G4VUserTrackInformation concrete
       // class object to a G4Track object.
 
+   enum RngType
+   {
+     fDefault, fGeneric, fSpecial
+   };
+
+   void SetRngType(RngType aRngType);
+   RngType GetRngType() const;
+
 //---------
    private:
 //---------
@@ -142,6 +150,8 @@ public: // without description
    G4int verboseLevel;
    G4TrackingMessenger* messenger;
    G4bool EventIsAborted;
+   RngType fRngType;
+
 // verbose
    void TrackBanner();
 
@@ -208,6 +218,16 @@ public: // without description
 
    inline void G4TrackingManager::SetUserTrackInformation(G4VUserTrackInformation* aValue) {
      if(fpTrack) fpTrack->SetUserInformation(aValue);
+   }
+
+   inline void G4TrackingManager::SetRngType(G4TrackingManager::RngType aRngType)
+   {
+     fRngType = aRngType;
+   }
+
+   inline G4TrackingManager::RngType G4TrackingManager::GetRngType() const
+   {
+     return fRngType;
    }
 
 #endif
