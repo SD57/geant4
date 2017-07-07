@@ -70,7 +70,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // encourage developers to copy it and modify it for their own
 // use.  We invite comments and improvements.
 
-#include <features/compilerfeatures.h>
+#include <CLHEP/Random/include/features/compilerfeatures.h>
 #include <limits>
 #if R123_USE_CXX11_TYPE_TRAITS
 #include <type_traits>

@@ -21,6 +21,7 @@ public:
   using ret_type = ctr_type;
   G4Cbprng(ctr_type const& aCtr, key_type const& aKey = {{0x0}});
   G4Cbprng();
+  virtual ~G4Cbprng() override;
 
   virtual double flat() override;
   // Returns a pseudo random number between 0 and 1
@@ -52,10 +53,10 @@ public:
   virtual bool getState (const std::vector<unsigned long> & v) override;
   // Save and restore to/from vectors
 
-  static std::string engineName() {return "Cbprng";}
+  static std::string engineName();
   // Static engine name, must be defined explicitly for the instances
 
-  virtual std::string name() const override {return engineName();}
+  virtual std::string name() const override;
   // Engine name.
   static std::string beginTag();
 

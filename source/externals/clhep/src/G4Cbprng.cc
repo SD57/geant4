@@ -7,9 +7,10 @@
 #include "CLHEP/Utility/atomic_int.h"
 #include <type_traits>
 
-#include "CLHEP/../../Random123/examples/uniform.hpp"
-#include "CLHEP/../../Random123/include/philox.h"
-#include "CLHEP/../../Random123/include/threefry.h"
+#include "CLHEP/Random/examples/uniform.hpp"
+#include "CLHEP/Random/include/philox.h"
+#include "CLHEP/Random/include/threefry.h"
+#include "CLHEP/Random/include/ReinterpretCtr.hpp"
 
 // uncomment for debugging output
 //#define G4CBPRNGDEBUG
@@ -36,6 +37,10 @@ G4Cbprng<RNG_t>::G4Cbprng(): G4Cbprng(ctr_type{{}})
   int const numEngines = numberOfEngines++;
   setSeed(static_cast<long>(numEngines));
 }
+
+template<typename RNG_t>
+G4Cbprng<RNG_t>::~G4Cbprng()
+{}
 
 template<typename RNG_t>
 double G4Cbprng<RNG_t>::flat()
@@ -180,6 +185,12 @@ void G4Cbprng<RNG_t>::showStatus() const
             << "fCtr = " << fCtr
             << ", fKey = " << fKey
             << std::endl;
+}
+
+template<typename RNG_t>
+std::string G4Cbprng<RNG_t>::name() const
+{
+  return engineName();
 }
 
 template<typename RNG_t>
