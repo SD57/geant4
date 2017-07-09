@@ -47,11 +47,7 @@
 
 #include "CLHEP/Random/RandomEngine.h" // FIXME for the clang-based IDE parser, redundant
 
-#if defined(G4MULTITHREADED)
-#define HEPRNDM G4MTHepRandom
-#else
-#define HEPRNDM CLHEP::HepRandom
-#endif
+//#define G4TRACKINGMANAGERDEBUG
 
 namespace
 {
@@ -110,22 +106,23 @@ void G4TrackingManager::ProcessOneTrack(G4Track* apValueG4Track)
   // TODO this is the place to set the rng state from the newly received track
   auto const trackHash = (fRngType == fDefault) ? 0 : [this]()
   {
-    auto const hash = fpTrack->GetHash();
-    auto& currentHepRandomEngine = *HEPRNDM::getTheEngine();
-    if(hash) // safety to work before fully implemented
+    auto hash = fpTrack->GetHash();
+    auto* currentHepRandomEngine = G4Random::getTheEngine();
+    if(!hash) // for the first track in the event
     {
-      currentHepRandomEngine.setSeed(static_cast<signed>(hash), 0); // FIXME second argument?
-      return hash;
-    }
-    else // for the first track in the event
-    {
-      uint32_t const low = static_cast<unsigned int>(currentHepRandomEngine);//fixed width for bit operations
-      uint32_t const high = static_cast<unsigned int>(currentHepRandomEngine);
+      uint32_t const low = static_cast<unsigned int>(*currentHepRandomEngine);//fixed width for bit operations
+      uint32_t const high = static_cast<unsigned int>(*currentHepRandomEngine);
       int64_t const composition = static_cast<int64_t>(high) << 32 | low;
       fpTrack->SetHash(composition);
-      return composition;
+      hash = composition;
     }
+    currentHepRandomEngine->setSeed(static_cast<signed>(hash), 0); // FIXME second argument?
+    return hash;
   }();
+
+#ifdef G4TRACKINGMANAGERDEBUG
+  G4cout << "start tracking hash " << trackHash << G4endl;
+#endif
 
   // Pre tracking user intervention process.
   fpTrajectory = 0;
@@ -177,18 +174,27 @@ void G4TrackingManager::ProcessOneTrack(G4Track* apValueG4Track)
   // this is the place to assign rng state to the daughter tracks
   if(fRngType != fDefault)
   {
-    auto& currentHepRandomEngine = *HEPRNDM::getTheEngine();
-    currentHepRandomEngine.setSeed(trackHash, 0); // FIXME second argument?
+    G4Random::setTheSeed(trackHash); // FIXME second argument?
     auto* theSecondaries = GimmeSecondaries();
     auto const numOfSecondaries = theSecondaries->size();
+#ifdef G4TRACKINGMANAGERDEBUG
+    if(numOfSecondaries) G4cout << "trackHash = " << trackHash << ", secondary seeds:";
+#endif
     for(auto ind = 0lu; ind < numOfSecondaries; ++ind)
     {
       auto* secondary = theSecondaries->at(ind);
       auto aHash = trackHash;
-      hash_combine(ind, aHash);
-      auto seed = static_cast<signed>(aHash); // TODO a stronger hash
+      auto aNewHash = ind;
+      hash_combine(aNewHash, aHash); // FIXME use a stronger hash
+      auto seed = static_cast<signed>(aNewHash);
       secondary->SetHash(seed);
+#ifdef G4TRACKINGMANAGERDEBUG
+      G4cout << " " << seed;
+#endif
     }
+#ifdef G4TRACKINGMANAGERDEBUG
+    if(numOfSecondaries)  G4cout << G4endl;
+#endif
   }
 
   // Post tracking user intervention process.
