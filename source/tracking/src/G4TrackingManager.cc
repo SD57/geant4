@@ -116,7 +116,7 @@ void G4TrackingManager::ProcessOneTrack(G4Track* apValueG4Track)
       fpTrack->SetHash(composition);
       hash = composition;
     }
-    currentHepRandomEngine->setSeed(static_cast<signed>(hash), 0); // FIXME second argument?
+    G4Random::setTheSeed(hash); // FIXME second argument?
     return hash;
   }();
 
@@ -174,7 +174,6 @@ void G4TrackingManager::ProcessOneTrack(G4Track* apValueG4Track)
   // this is the place to assign rng state to the daughter tracks
   if(fRngType != fDefault)
   {
-    G4Random::setTheSeed(trackHash); // FIXME second argument?
     auto* theSecondaries = GimmeSecondaries();
     auto const numOfSecondaries = theSecondaries->size();
 #ifdef G4TRACKINGMANAGERDEBUG
