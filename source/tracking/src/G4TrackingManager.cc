@@ -103,20 +103,33 @@ void G4TrackingManager::ProcessOneTrack(G4Track* apValueG4Track)
   fpSteppingManager->SetInitialStep(fpTrack);
 
 
-  // TODO this is the place to set the rng state from the newly received track
+  // this is the place to set the rng state from the newly received track
   auto const trackHash = (fRngType == fDefault) ? 0 : [this]()
   {
-    auto hash = fpTrack->GetHash();
     auto* currentHepRandomEngine = G4Random::getTheEngine();
+    auto hash = fpTrack->GetHash();
     if(!hash) // for the first track in the event
     {
       uint32_t const low = static_cast<unsigned int>(*currentHepRandomEngine);//fixed width for bit operations
       uint32_t const high = static_cast<unsigned int>(*currentHepRandomEngine);
-      int64_t const composition = static_cast<int64_t>(high) << 32 | low;
+      int64_t const composition = (static_cast<int64_t>(high) << 32) | low;
       fpTrack->SetHash(composition);
       hash = composition;
     }
-    G4Random::setTheSeed(hash); // FIXME second argument?
+    G4bool const isMixMax = dynamic_cast<CLHEP::MixMaxRng*>(currentHepRandomEngine);
+    if(fRngType == fSpecial && isMixMax)
+    {
+#ifdef G4TRACKINGMANAGERDEBUG
+      G4cout << "G4TrackingManager::ProcessOneTrack: special seeding MixMax" << G4endl;
+#endif
+      constexpr uint64_t MASK32=0xffffffff;
+      uint32_t const low = static_cast<uint64_t>(hash) & MASK32;
+      uint32_t const high = static_cast<uint64_t>(hash) >> 32;
+      std::array<G4long, 2> const seeds{{low, high}};
+      // for MixMaxRng setTheSeeds calls seed_uniquestream
+      G4Random::setTheSeeds(seeds.data());
+    }
+    else G4Random::setTheSeed(hash); // FIXME second argument?
     return hash;
   }();
 
