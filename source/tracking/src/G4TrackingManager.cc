@@ -129,7 +129,7 @@ void G4TrackingManager::ProcessOneTrack(G4Track* apValueG4Track)
       // for MixMaxRng setTheSeeds calls seed_uniquestream
       G4Random::setTheSeeds(seeds.data());
     }
-    else G4Random::setTheSeed(hash); // FIXME second argument?
+    else G4Random::setTheSeed(hash);
     return hash;
   }();
 
@@ -196,7 +196,7 @@ void G4TrackingManager::ProcessOneTrack(G4Track* apValueG4Track)
     {
       auto* secondary = theSecondaries->at(ind);
       auto aHash = trackHash;
-      auto aNewHash = ind;
+      auto aNewHash = std::hash<decltype(ind)>()(ind);
       hash_combine(aNewHash, aHash); // FIXME use a stronger hash
       auto seed = static_cast<signed>(aNewHash);
       secondary->SetHash(seed);
