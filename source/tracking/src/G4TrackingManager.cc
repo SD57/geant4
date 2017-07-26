@@ -51,6 +51,15 @@
 
 namespace
 {
+#ifdef G4TRACKINGMANAGERDEBUG
+constexpr bool debugOutput = true;
+#else
+constexpr bool debugOutput = false;
+#endif
+} // anonymous namespace
+
+namespace
+{
 template <class T> void hash_combine(std::size_t& seed, T const& v);
 }
 
@@ -110,7 +119,8 @@ void G4TrackingManager::ProcessOneTrack(G4Track* apValueG4Track)
     auto hash = fpTrack->GetHash();
     if(!hash) // for the first track in the event
     {
-      uint32_t const low = static_cast<unsigned int>(*currentHepRandomEngine);//fixed width for bit operations
+      // use fixed width for bit operations
+      uint32_t const low = static_cast<unsigned int>(*currentHepRandomEngine);
       uint32_t const high = static_cast<unsigned int>(*currentHepRandomEngine);
       int64_t const composition = (static_cast<int64_t>(high) << 32) | low;
       fpTrack->SetHash(composition);
@@ -119,9 +129,8 @@ void G4TrackingManager::ProcessOneTrack(G4Track* apValueG4Track)
     G4bool const isMixMax = dynamic_cast<CLHEP::MixMaxRng*>(currentHepRandomEngine);
     if(fRngType == fSpecial && isMixMax)
     {
-#ifdef G4TRACKINGMANAGERDEBUG
-      G4cout << "G4TrackingManager::ProcessOneTrack: special seeding MixMax" << G4endl;
-#endif
+      if(debugOutput)
+        G4cout << "G4TrackingManager::ProcessOneTrack: special seeding MixMax" << G4endl;
       constexpr uint64_t MASK32=0xffffffff;
       uint32_t const low = static_cast<uint64_t>(hash) & MASK32;
       uint32_t const high = static_cast<uint64_t>(hash) >> 32;
@@ -133,9 +142,8 @@ void G4TrackingManager::ProcessOneTrack(G4Track* apValueG4Track)
     return hash;
   }();
 
-#ifdef G4TRACKINGMANAGERDEBUG
-  G4cout << "start tracking hash " << trackHash << G4endl;
-#endif
+  if(debugOutput)
+    G4cout << "start tracking hash " << trackHash << G4endl;
 
   // Pre tracking user intervention process.
   fpTrajectory = 0;
@@ -189,9 +197,10 @@ void G4TrackingManager::ProcessOneTrack(G4Track* apValueG4Track)
   {
     auto* theSecondaries = GimmeSecondaries();
     auto const numOfSecondaries = theSecondaries->size();
-#ifdef G4TRACKINGMANAGERDEBUG
-    if(numOfSecondaries) G4cout << "trackHash = " << trackHash << ", secondary seeds:";
-#endif
+    if(debugOutput)
+    {
+      if(numOfSecondaries) G4cout << "trackHash = " << trackHash << ", secondary seeds:";
+    }
     for(auto ind = 0lu; ind < numOfSecondaries; ++ind)
     {
       auto* secondary = theSecondaries->at(ind);
@@ -200,13 +209,9 @@ void G4TrackingManager::ProcessOneTrack(G4Track* apValueG4Track)
       hash_combine(aNewHash, aHash); // FIXME use a stronger hash
       auto seed = static_cast<signed>(aNewHash);
       secondary->SetHash(seed);
-#ifdef G4TRACKINGMANAGERDEBUG
-      G4cout << " " << seed;
-#endif
+      if(debugOutput) G4cout << " " << seed;
     }
-#ifdef G4TRACKINGMANAGERDEBUG
-    if(numOfSecondaries)  G4cout << G4endl;
-#endif
+    if(debugOutput) if(numOfSecondaries) G4cout << G4endl;
   }
 
   // Post tracking user intervention process.
