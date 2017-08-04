@@ -116,7 +116,13 @@ void G4UserWorkerThreadInitialization::SetupRNGEngine(const CLHEP::HepRandomEngi
     if ( dynamic_cast<const CLHEP::RanshiEngine*>(aNewRNG) ) {
        retRNG= new CLHEP::RanshiEngine;
     }
-    
+    if ( dynamic_cast<const CLHEP::G4Philox*>(aNewRNG) ) {
+       retRNG= new CLHEP::G4Philox;
+    }
+    if ( dynamic_cast<const CLHEP::G4Threefry*>(aNewRNG) ) {
+       retRNG= new CLHEP::G4Threefry;
+    }
+
     if( retRNG != 0 ) {
        G4Random::setTheEngine( retRNG );
     }else{
