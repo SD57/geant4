@@ -28,7 +28,7 @@
 namespace CLHEP
 {
 
-template<> inline std::string G4Philox::engineName()
+template<> std::string G4Philox::engineName()
 {
     return "CbprngPhilox1x64";
 }

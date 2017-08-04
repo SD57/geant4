@@ -238,19 +238,19 @@ R123_STATIC_INLINE bool operator==(R123_ULONG_LONG lhs, const r123m128i &rhs){
     r123m128i LHS; LHS.m=_mm_set_epi64x(0, lhs); return LHS == rhs; }
 R123_STATIC_INLINE bool operator!=(R123_ULONG_LONG lhs, const r123m128i &rhs){
     return !(lhs==rhs);}
-R123_STATIC_INLINE std::ostream& operator<<(std::ostream& os, const r123m128i& m){
+R123_STATIC_INLINE std::ostream& operator<<(std::ostream& os, const r123m128i& m_){
     union{
         uint64_t u64[2];
         __m128i m;
     }u;
-    _mm_storeu_si128(&u.m, m.m);
+    _mm_storeu_si128(&u.m, m_.m);
     return os << u.u64[0] << " " << u.u64[1];
 }
 
-R123_STATIC_INLINE std::istream& operator>>(std::istream& is, r123m128i& m){
+R123_STATIC_INLINE std::istream& operator>>(std::istream& is, r123m128i& m_){
     uint64_t u64[2];
     is >> u64[0] >> u64[1];
-    m.m = _mm_set_epi64x(u64[1], u64[0]);
+    m_.m = _mm_set_epi64x(u64[1], u64[0]);
     return is;
 }
 

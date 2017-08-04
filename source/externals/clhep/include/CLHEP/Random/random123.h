@@ -29,8 +29,6 @@
 #define RANDOM123_H
 
 #ifdef __clang__
-#warning "Disabling -Wexpansion-to-defined for clean compile output"
-// TODO check portability
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wexpansion-to-defined"
 #endif
@@ -39,6 +37,9 @@
 #include "CLHEP/Random/include/ReinterpretCtr.hpp"
 #include "CLHEP/Random/examples/uniform.hpp"
 #ifdef __clang__
+#ifndef __clangfeatures_dot_hpp
+#warning "Disabling -Wexpansion-to-defined for clean compile output"
+#endif
 #pragma clang diagnostic pop
 // FIXME looks like the diagnostic still remains suppressed
 #endif
