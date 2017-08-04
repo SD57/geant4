@@ -23,24 +23,14 @@
 // * acceptance of all terms of the Geant4 Software license.          *
 // ********************************************************************
 
-/// Header to include Random123 files and suppress repetative warnings
+#include "G4Philox.h"
 
-#ifndef RANDOM123_H
-#define RANDOM123_H
+namespace CLHEP
+{
 
-#ifdef __clang__
-#warning "Disabling -Wexpansion-to-defined for clean compile output"
-// TODO check portability
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wexpansion-to-defined"
-#endif
-#include "CLHEP/Random/include/philox.h"
-#include "CLHEP/Random/include/threefry.h"
-#include "CLHEP/Random/include/ReinterpretCtr.hpp"
-#include "CLHEP/Random/examples/uniform.hpp"
-#ifdef __clang__
-#pragma clang diagnostic pop
-// FIXME looks like the diagnostic still remains suppressed
-#endif
+template<> inline std::string G4Philox::engineName()
+{
+    return "CbprngPhilox1x64";
+}
 
-#endif // RANDOM123_H
+}

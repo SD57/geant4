@@ -23,24 +23,15 @@
 // * acceptance of all terms of the Geant4 Software license.          *
 // ********************************************************************
 
-/// Header to include Random123 files and suppress repetative warnings
+#ifndef G4THREEFRY_HH
+#define G4THREEFRY_HH
 
-#ifndef RANDOM123_H
-#define RANDOM123_H
+#include "CLHEP/Random/G4Cbprng.h"
+#include "CLHEP/Random/random123.h"
 
-#ifdef __clang__
-#warning "Disabling -Wexpansion-to-defined for clean compile output"
-// TODO check portability
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wexpansion-to-defined"
-#endif
-#include "CLHEP/Random/include/philox.h"
-#include "CLHEP/Random/include/threefry.h"
-#include "CLHEP/Random/include/ReinterpretCtr.hpp"
-#include "CLHEP/Random/examples/uniform.hpp"
-#ifdef __clang__
-#pragma clang diagnostic pop
-// FIXME looks like the diagnostic still remains suppressed
-#endif
+namespace CLHEP
+{
+using G4Threefry = G4Cbprng<r123::ReinterpretCtr<r123array1x64, r123::Threefry2x32>>;
+}
 
-#endif // RANDOM123_H
+#endif // G4THREEFRY_HH

@@ -24,7 +24,8 @@
 #include "CLHEP/Random/engineIDulong.h"
 #include "CLHEP/Random/engineIDulong.h"
 #include "CLHEP/Random/random123.h"
-#include "CLHEP/Random/G4Cbprng.h"
+#include "CLHEP/Random/G4Philox.h"
+#include "CLHEP/Random/G4Threefry.h"
 #include <iostream>
 #include <string>
 
@@ -65,8 +66,8 @@ HepRandomEngine* EngineFactory::newEngine(std::istream& is) {
   eptr = makeAnEngine <RanluxEngine>    (tag, is); if (eptr) return eptr;
   eptr = makeAnEngine <RanshiEngine>    (tag, is); if (eptr) return eptr;
   eptr = makeAnEngine <NonRandomEngine> (tag, is); if (eptr) return eptr;
-  eptr = makeAnEngine <G4Cbprng<r123::Philox2x32>>  (tag, is); if (eptr) return eptr;
-  eptr = makeAnEngine <G4Cbprng<r123::Threefry2x32>>  (tag, is); if (eptr) return eptr;
+  eptr = makeAnEngine <G4Philox>  (tag, is); if (eptr) return eptr;
+  eptr = makeAnEngine <G4Threefry>  (tag, is); if (eptr) return eptr;
   is.clear(std::ios::badbit | is.rdstate());
   std::cerr << 
   	"Input mispositioned or bad in reading anonymous engine\n"
@@ -87,8 +88,8 @@ EngineFactory::newEngine(std::vector<unsigned long> const & v) {
   eptr = makeAnEngine <RanluxEngine>    (v); if (eptr) return eptr;
   eptr = makeAnEngine <RanshiEngine>    (v); if (eptr) return eptr;
   eptr = makeAnEngine <NonRandomEngine> (v); if (eptr) return eptr;
-  eptr = makeAnEngine <G4Cbprng<r123::Philox2x32>>  (v); if (eptr) return eptr;
-  eptr = makeAnEngine <G4Cbprng<r123::Threefry2x32>>  (v); if (eptr) return eptr;
+  eptr = makeAnEngine <G4Philox>  (v); if (eptr) return eptr;
+  eptr = makeAnEngine <G4Threefry>  (v); if (eptr) return eptr;
   std::cerr << 
   	"Cannot correctly get anonymous engine from vector\n"
 	    << "First unsigned long was: " << v[0] 

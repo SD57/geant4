@@ -43,7 +43,8 @@
 #include "G4RichTrajectory.hh"
 #include "G4ios.hh"
 #include "Randomize.hh"
-#include "G4Cbprng.h"
+#include "G4Philox.h"
+#include "G4Threefry.h"
 
 #include "CLHEP/Random/RandomEngine.h" // FIXME for the clang-based IDE parser, redundant
 

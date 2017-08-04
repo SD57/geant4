@@ -1,16 +1,34 @@
-//    Copyright (c) 2017 Dmitry Savin <sd57@protonmail.ch>
 //
-//    Distributed under the GNU General Public License version 3.
+// ********************************************************************
+// * License and Disclaimer                                           *
+// *                                                                  *
+// * The  Geant4 software  is  copyright of the Copyright Holders  of *
+// * the Geant4 Collaboration.  It is provided  under  the terms  and *
+// * conditions of the Geant4 Software License,  included in the file *
+// * LICENSE and available at  http://cern.ch/geant4/license .  These *
+// * include a list of copyright holders.                             *
+// *                                                                  *
+// * Neither the authors of this software system, nor their employing *
+// * institutes,nor the agencies providing financial support for this *
+// * work  make  any representation or  warranty, express or implied, *
+// * regarding  this  software system or assume any liability for its *
+// * use.  Please see the license in the file  LICENSE  and URL above *
+// * for the full disclaimer and the limitation of liability.         *
+// *                                                                  *
+// * This  code  implementation is the result of  the  scientific and *
+// * technical work of the GEANT4 collaboration.                      *
+// * By using,  copying,  modifying or  distributing the software (or *
+// * any work based  on the software)  you  agree  to acknowledge its *
+// * use  in  resulting  scientific  publications,  and indicate your *
+// * acceptance of all terms of the Geant4 Software license.          *
+// ********************************************************************
 
 #include "CLHEP/Random/G4Cbprng.h"
 #include "CLHEP/Random/engineIDulong.h"
 #include "CLHEP/Utility/atomic_int.h"
 #include <type_traits>
 
-#include "CLHEP/Random/examples/uniform.hpp"
-#include "CLHEP/Random/include/philox.h"
-#include "CLHEP/Random/include/threefry.h"
-#include "CLHEP/Random/include/ReinterpretCtr.hpp"
+#include "CLHEP/Random/random123.h"
 
 // uncomment for debugging output
 //#define G4CBPRNGDEBUG
@@ -199,20 +217,8 @@ std::string G4Cbprng<RNG_t>::beginTag ( )
   return engineName() + "-begin";
 }
 
-template<>
-std::string G4Cbprng<r123::Philox2x32>::engineName()
-{
-    return "CbprngPhilox2x32";
-}
-
-template<>
-std::string G4Cbprng<r123::Threefry2x32>::engineName()
-{
-    return "CbprngThreefry2x32";
-}
-
-template class G4Cbprng<r123::Philox2x32>;
-template class G4Cbprng<r123::Threefry2x32>;
+template class G4Cbprng<r123::ReinterpretCtr<r123array1x64, r123::Threefry2x32>>;
+template class G4Cbprng<r123::ReinterpretCtr<r123array1x64, r123::Philox2x32>>;
 
 } // namespace CLHEP
 
