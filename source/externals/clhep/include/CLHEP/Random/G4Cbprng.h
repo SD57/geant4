@@ -52,7 +52,7 @@ public:
   virtual void flatArray(const int size, double* vect) override;
   // Fills an array "vect" of specified size with flat random values.
 
-  virtual void setSeed (long aCtr, int index = 0) override;
+  virtual void setSeed (long aCtr, int = 0) override;
   // Resets the state of the algorithm according to "index", the position
   // in the static table of seeds stored in HepRandom.
 
@@ -74,6 +74,13 @@ public:
   virtual bool get (const std::vector<unsigned long> & v) override;
   virtual bool getState (const std::vector<unsigned long> & v) override;
   // Save and restore to/from vectors
+
+  virtual std::ostream & put (std::ostream & os) const override;
+  virtual std::istream & get (std::istream & is) override;
+  // Save and restore to/from streams
+
+  virtual std::istream & getState ( std::istream & is ) override;
+  // Helpers for EngineFactory which restores anonymous engine from istream
 
   static std::string engineName();
   // Static engine name, must be defined explicitly for the instances

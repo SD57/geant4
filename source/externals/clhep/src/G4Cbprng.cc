@@ -66,11 +66,8 @@ double G4Cbprng<RNG_t>::flat()
   // FIXME assumes that randVals is an array of two 32-bit integers
   // may work for bigger outputs
   // TODO make a function to use in flatArray
-  auto const randVals = fRNG(fCtr, fKey);
-  uint32_t const low = randVals.front();
-  uint32_t const high = randVals.back();
-  uint64_t composition = static_cast<uint64_t>(high) << 32 | low;
-  double const value = r123::u01<double>(composition);
+  auto const randVal = fRNG(fCtr, fKey).front();
+  double const value = r123::u01<double>(randVal);
   ++fKey.front();
   return value;
 }
@@ -90,31 +87,26 @@ void G4Cbprng<RNG_t>::flatArray(const int size, double* vect)
   // TODO use std::transform
   for(auto it = 0; it < size; ++it)
   {
-    auto const& res = results.at(static_cast<unsigned>(it));
-    uint32_t const low = res.front();
-    uint32_t const high = res.back();
-    uint64_t composition = static_cast<uint64_t>(high) << 32 | low;
-    double const value = r123::u01<double>(composition);
+    auto const res = results.at(static_cast<unsigned>(it)).front();
+    double const value = r123::u01<double>(res);
     vect[it] = value;
   }
 }
 
 template<typename RNG_t>
-void G4Cbprng<RNG_t>::setSeed (long aCtr, int index)
+void G4Cbprng<RNG_t>::setSeed (long aCtr, int )
 {
   // int and long widths are imlementation specific
-  // TODO indicate that only 32 bits are used
-  size_t const position = static_cast<size_t>(index)%fCtr.size();
-  fCtr.at(position) = static_cast<typename ctr_type::value_type>(aCtr);
+  fCtr.front() = static_cast<typename ctr_type::value_type>(aCtr);
+  fKey = {{}};
 }
 
 template<typename RNG_t>
 void G4Cbprng<RNG_t>::setSeeds (const long* seeds, int aKey)
 {
   // int and long widths are imlementation specific
-  // TODO indicate that only 32 bits are used
+  // TODO indicate that only 64 bits are used
   fCtr.front() = static_cast<typename ctr_type::value_type>(seeds[0]);
-  fCtr.back() = static_cast<typename ctr_type::value_type>(seeds[1]);
   fKey = {{static_cast<typename key_type::value_type>(aKey)}};
 }
 
@@ -195,6 +187,65 @@ bool G4Cbprng<RNG_t>::getState (const std::vector<unsigned long> & v)
   std::copy_n(v.begin() + 1 + ctr_type::static_size, key_type::static_size, fKey.begin());
   return true;
 }
+
+template<typename RNG_t>
+std::ostream& G4Cbprng<RNG_t>::put( std::ostream& os ) const
+{
+  os << beginTag() << "\nUvec\n";
+  std::vector<unsigned long> v = put();
+  for (unsigned int i=0; i<v.size(); ++i) {
+     os <<  v[i] <<  "\n";
+  }
+  return os;
+}
+
+template<typename RNG_t>
+std::istream & G4Cbprng<RNG_t>::get ( std::istream& is )
+{
+  auto const MarkerLen = beginTag().size();
+  char beginMarker [MarkerLen];
+
+  is >> std::ws;
+  is.width(MarkerLen);  // causes the next read to the char* to be <=
+      // that many bytes, INCLUDING A TERMINATION \0
+      // (Stroustrup, section 21.3.2)
+  is >> beginMarker;
+  if (strcmp(beginMarker,beginTag().c_str())) {
+     is.clear(std::ios::badbit | is.rdstate());
+     std::cerr << "\nInput stream mispositioned or"
+         << "\nG4Cbprng state description missing or"
+         << "\nwrong engine type found." << std::endl;
+     return is;
+   }
+  return getState(is);
+}
+
+template<typename RNG_t>
+std::istream & G4Cbprng<RNG_t>::getState ( std::istream& is )
+{
+  if ( possibleKeywordInput ( is, "Uvec", theSeed ) ) {
+    std::vector<unsigned long> v;
+    unsigned long uu;
+    for (unsigned int ivec=0; ivec < VECTOR_STATE_SIZE; ++ivec) {
+      is >> uu;
+      if (!is) {
+        is.clear(std::ios::badbit | is.rdstate());
+        std::cerr << "\nCbprng state (vector) description improper."
+    << "\ngetState() has failed."
+         << "\nInput stream is probably mispositioned now." << std::endl;
+        return is;
+      }
+      v.push_back(uu);
+    }
+    getState(v);
+  }
+  else
+  {
+    std::cerr << "\nCbprng state import failed: unknown keyword\n";
+  }
+  return (is);
+}
+
 
 template<typename RNG_t>
 void G4Cbprng<RNG_t>::showStatus() const
