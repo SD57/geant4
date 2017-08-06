@@ -58,17 +58,24 @@ G4Cbprng<RNG_t>::G4Cbprng(): G4Cbprng(ctr_type{{}})
 
 template<typename RNG_t>
 G4Cbprng<RNG_t>::~G4Cbprng()
-{}
+{
+  using ctr_type = typename RNG_t::ctr_type; ///< Counter type
+  using key_type = typename RNG_t::key_type; ///< Key type
+  /// The type of the value yielded by the generator
+  using ret_type = typename std::result_of<RNG_t(ctr_type, key_type)>::type;
+  static_assert(std::is_same<ret_type, r123::Array1x64>::value,
+                "bad return type, must be an array of 1 64-bit unsigned integer");
+}
 
 template<typename RNG_t>
 double G4Cbprng<RNG_t>::flat()
 {
-  // FIXME assumes that randVals is an array of two 32-bit integers
+  // FIXME assumes that randVals is an array of one64-bit integer
   // may work for bigger outputs
   // TODO make a function to use in flatArray
   auto const randVal = fRNG(fCtr, fKey).front();
   double const value = r123::u01<double>(randVal);
-  ++fKey.front();
+  increaseKey();
   return value;
 }
 
@@ -82,7 +89,7 @@ void G4Cbprng<RNG_t>::flatArray(const int size, double* vect)
   for(auto it = 0; it < size; ++it)
   {
     results.push_back(fRNG(fCtr, fKey));
-    ++fKey.front();
+    increaseKey();
   }
   // TODO use std::transform
   for(auto it = 0; it < size; ++it)
@@ -266,6 +273,21 @@ template<typename RNG_t>
 std::string G4Cbprng<RNG_t>::beginTag ( )
 {
   return engineName() + "-begin";
+}
+
+template<typename RNG_t>
+void G4Cbprng<RNG_t>::increaseCtr()
+{
+  ++fCtr.front();
+}
+
+template<typename RNG_t>
+void G4Cbprng<RNG_t>::increaseKey()
+{
+  // increment the parts of the key starting from the back
+  auto it = fKey.rbegin();
+  ++(*it);
+  while(!*(it++) && it != fKey.rend()) ++(*it);
 }
 
 template class G4Cbprng<r123::ReinterpretCtr<r123array1x64, r123::Threefry2x32>>;

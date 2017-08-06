@@ -41,7 +41,7 @@ public:
   using ctr_type = typename RNG::ctr_type;
   using key_type = typename RNG::key_type;
   using ret_type = ctr_type;
-  G4Cbprng(ctr_type const& aCtr, key_type const& aKey = {{0x0}});
+  G4Cbprng(ctr_type const& aCtr, key_type const& aKey = {{}});
   G4Cbprng();
   virtual ~G4Cbprng() override;
 
@@ -93,6 +93,9 @@ private:
   RNG fRNG;
   ctr_type fCtr;
   key_type fKey;
+
+  void increaseKey();
+  void increaseCtr();
 
   static const unsigned int VECTOR_STATE_SIZE = 1 + ctr_type::static_size
                                                   + key_type::static_size;
