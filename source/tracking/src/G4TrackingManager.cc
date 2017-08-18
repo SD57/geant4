@@ -127,8 +127,17 @@ void G4TrackingManager::ProcessOneTrack(G4Track* apValueG4Track)
       fpTrack->SetHash(composition);
       hash = composition;
     }
-    G4bool const isMixMax = dynamic_cast<CLHEP::MixMaxRng*>(currentHepRandomEngine);
-    if(fRngType == fSpecial && isMixMax)
+    auto const isMixMax = [currentHepRandomEngine]() -> G4bool
+    {
+      return  dynamic_cast<CLHEP::MixMaxRng*>(currentHepRandomEngine);
+    };
+    auto const isRanlux = [currentHepRandomEngine]() -> G4bool
+    {
+      return dynamic_cast<CLHEP::RanluxEngine*>(currentHepRandomEngine);
+    };
+
+    if((fRngType == fSpecial && isMixMax()) ||
+       (isRanlux())) // because setSeeds sets an invalid state af Ranlux
     {
       if(debugOutput)
         G4cout << "G4TrackingManager::ProcessOneTrack: special seeding MixMax" << G4endl;
@@ -139,7 +148,15 @@ void G4TrackingManager::ProcessOneTrack(G4Track* apValueG4Track)
       // for MixMaxRng setTheSeeds calls seed_uniquestream
       G4Random::setTheSeeds(seeds.data());
     }
-    else G4Random::setTheSeed(hash);
+    else
+    {
+      auto const isHepJames = [currentHepRandomEngine]() -> G4bool
+      {
+        return dynamic_cast<CLHEP::HepJamesRandom*>(currentHepRandomEngine);
+      };
+      if(isHepJames()) hash = static_cast<unsigned>(hash);
+      G4Random::setTheSeed(hash);
+    }
     return hash;
   }();
 
