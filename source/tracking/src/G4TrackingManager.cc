@@ -144,7 +144,7 @@ void G4TrackingManager::ProcessOneTrack(G4Track* apValueG4Track)
       constexpr uint64_t MASK32=0xffffffff;
       uint32_t const low = static_cast<uint64_t>(hash) & MASK32;
       uint32_t const high = static_cast<uint64_t>(hash) >> 32;
-      std::array<G4long, 2> const seeds{{low, high}};
+      std::array<G4long, 3> const seeds{{low, high, 0}};
       // for MixMaxRng setTheSeeds calls seed_uniquestream
       G4Random::setTheSeeds(seeds.data());
     }
